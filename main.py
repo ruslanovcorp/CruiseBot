@@ -96,16 +96,12 @@ async def receive_webhook(request: Request):
             for entry in data.get("entry", []):
                 for messaging_event in entry.get("messaging", []):
 
-                    sender_id = messaging_event["sender"]["id"]
+                    # Обрабатываем ТОЛЬКО обычные сообщения
+                    if "message" in messaging_event and "text" in messaging_event["message"]:
 
-                    if "message" in messaging_event:
-                        message = messaging_event["message"]
+                        sender_id = messaging_event["sender"]["id"]
+                        text = messaging_event["message"]["text"]
 
-                        if message.get("is_echo"):
-                            print("Echo ignored")
-                            continue
-
-                        text = message.get("text", "")
                         print("IG TEXT:", text)
 
                         reply = generate_response(text)

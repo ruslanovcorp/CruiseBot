@@ -92,23 +92,26 @@ async def receive_webhook(request: Request):
         # =========================
         # INSTAGRAM
         # =========================
+        if data["object"] == "instagram":
+            for entry in data.get("entry", []):
+                for messaging_event in entry.get("messaging", []):
 
-            if data["object"] == "instagram":
-                for entry in data.get("entry", []):
-                    for messaging_event in entry.get("messaging", []):
-                        
-                        sender_id = messaging_event["sender"]["id"]
-                        
-                        if "message" in messaging_event:
-                            message = messaging_event["message"]
-                            
-                            if message.get("is_echo"):
-                                continue
-                            
-                            text = message.get("text", "")
-                            
-                            reply = generate_response(text)
-                            send_instagram(sender_id, reply)
+                    sender_id = messaging_event["sender"]["id"]
+
+                    if "message" in messaging_event:
+                        message = messaging_event["message"]
+
+                        if message.get("is_echo"):
+                            print("Echo ignored")
+                            continue
+
+                        text = message.get("text", "")
+                        print("IG TEXT:", text)
+
+                        reply = generate_response(text)
+                        print("IG REPLY:", reply)
+
+                        send_instagram(sender_id, reply)
 
     return {"status": "ok"}
 # =========================

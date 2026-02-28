@@ -150,7 +150,7 @@ def send_whatsapp(phone, message):
 # =========================
 
 def send_instagram(user_id, message):
-    url = "https://graph.facebook.com/v19.0/me/messages"
+    url = f"https://graph.facebook.com/v19.0/{os.getenv('IG_BUSINESS_ID')}/messages"
 
     headers = {
         "Authorization": f"Bearer {INSTAGRAM_TOKEN}",
@@ -158,6 +158,7 @@ def send_instagram(user_id, message):
     }
 
     data = {
+        "messaging_product": "instagram",
         "recipient": {"id": user_id},
         "message": {"text": message}
     }

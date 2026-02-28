@@ -2,14 +2,54 @@ from fastapi import FastAPI, Request
 import os
 import requests
 from dotenv import load_dotenv
+from sqlalchemy.orm import Session
+
+from database import engine, SessionLocal
+from models import FAQ
+from database import Base
+
+Base.metadata.create_all(bind=engine)
 
 load_dotenv()
 
 app = FastAPI()
 
+@app.get("/")
+def root():
+    return {"status": "ok"}
+
+@app.get("/privacy")
+def privacy():
+    return {"message": "Privacy Policy"}
+
+@app.get("/data-deletion")
+def delete():
+    return {"message": "Data deletion instructions"}
+    
+
 VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
 WHATSAPP_TOKEN = os.getenv("WHATSAPP_TOKEN")
 PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
+INSTAGRAM_TOKEN = os.getenv("INSTAGRAM_TOKEN")
+
+# =========================
+# DATABASE SEARCH FUNCTION
+# =========================
+
+def get_faq_answer(user_text: str):
+    db: Session = SessionLocal()
+    try:
+        faqs = db.query(FAQ).all()
+        for faq in faqs:
+            if faq.question.lower() in user_text.lower():
+                return faq.answer
+        return None
+    finally:
+        db.close()
+
+# =========================
+# WEBHOOK VERIFICATION
+# =========================
 
 @app.get("/webhook")
 async def verify_webhook(request: Request):
@@ -20,37 +60,67 @@ async def verify_webhook(request: Request):
     if mode == "subscribe" and token == VERIFY_TOKEN:
         return int(challenge)
 
-    return {"status": "ok"}
+    return {"status": "verification failed"}
+
+# =========================
+# WEBHOOK RECEIVER
+# =========================
 
 @app.post("/webhook")
 async def receive_webhook(request: Request):
     data = await request.json()
     print("INCOMING:", data)
 
-    if "entry" in data:
-        for entry in data["entry"]:
-            for change in entry.get("changes", []):
-                value = change.get("value", {})
+    if "object" in data:
 
-                if "messages" in value:
-                    msg = value["messages"][0]
-                    phone = msg["from"]
-                    text = msg["text"]["body"]
+        # =========================
+        # WHATSAPP
+        # =========================
+        if data["object"] == "whatsapp_business_account":
+            for entry in data["entry"]:
+                for change in entry.get("changes", []):
+                    value = change.get("value", {})
 
-                    reply = generate_response(text)
-                    send_whatsapp(phone, reply)
+                    if "messages" in value:
+                        msg = value["messages"][0]
+                        phone = msg["from"]
+                        text = msg["text"]["body"]
+
+                        reply = generate_response(text)
+                        send_whatsapp(phone, reply)
+
+        # =========================
+        # INSTAGRAM
+        # =========================
+        if data["object"] == "instagram":
+            for entry in data["entry"]:
+                for change in entry.get("changes", []):
+                    value = change.get("value", {})
+
+                    if "messages" in value:
+                        msg = value["messages"][0]
+                        user_id = msg["from"]["id"]
+                        text = msg.get("text", "")
+
+                        reply = generate_response(text)
+                        send_instagram(user_id, reply)
 
     return {"status": "ok"}
+# =========================
+# RESPONSE GENERATOR
+# =========================
 
 def generate_response(text):
-    text = text.lower()
+    db_answer = get_faq_answer(text)
 
-    if "цена" in text:
-        return "Стоимость круиза начинается от 1200$."
-    if "маршрут" in text:
-        return "Доступны Карибы, Средиземное море и Азия."
+    if db_answer:
+        return db_answer
 
-    return "Здравствуйте! Вас интересует цена или маршрут?"
+    return "Здравствуйте! Напишите ваш вопрос, и мы ответим в ближайшее время."
+
+# =========================
+# SEND WHATSAPP
+# =========================
 
 def send_whatsapp(phone, message):
     url = f"https://graph.facebook.com/v19.0/{PHONE_NUMBER_ID}/messages"
@@ -68,4 +138,24 @@ def send_whatsapp(phone, message):
     }
 
     response = requests.post(url, headers=headers, json=data)
-    print("SEND STATUS:", response.status_code, response.text)
+    print("WHATSAPP STATUS:", response.status_code, response.text)
+
+# =========================
+# SEND INSTAGRAM1
+# =========================
+
+def send_instagram(user_id, message):
+    url = "https://graph.facebook.com/v19.0/me/messages"
+
+    headers = {
+        "Authorization": f"Bearer {INSTAGRAM_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "recipient": {"id": user_id},
+        "message": {"text": message}
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    print("INSTAGRAM STATUS:", response.status_code, response.text)

@@ -1,12 +1,12 @@
-from .models import FAQ
+from sqlalchemy import text
 
-def find_faq_answer(message: str, db):
-    faqs = db.query(FAQ).all()
+def find_faq_answer(message: str, db, company_id: int):
+    result = db.execute(text("""
+        SELECT * FROM faqs
+        WHERE company_id = :company_id
+        AND to_tsvector('russian', question)
+        @@ plainto_tsquery('russian', :query)
+        LIMIT 1
+    """), {"query": message, "company_id": company_id})
 
-    message_lower = message.lower()
-
-    for faq in faqs:
-        if faq.question.lower() in message_lower:
-            return faq.answer
-
-    return None
+    return result.fetchone()

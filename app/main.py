@@ -4,9 +4,8 @@ import requests
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 
-from database import engine, SessionLocal
-from models import FAQ
-from database import Base
+from .database import engine, SessionLocal, Base
+from .models import FAQ
 
 Base.metadata.create_all(bind=engine)
 

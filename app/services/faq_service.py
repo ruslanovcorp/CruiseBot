@@ -1,4 +1,4 @@
-from models import FAQ
+from .models import FAQ
 
 def find_faq_answer(message: str, db):
     faqs = db.query(FAQ).all()

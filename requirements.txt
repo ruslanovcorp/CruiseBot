@@ -1,13 +1,27 @@
+# Core
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 python-dotenv==1.0.0
+
+# Database
 sqlalchemy==2.0.23
 psycopg2-binary==2.9.9
+alembic==1.12.1
+
+# Validation & Settings
+pydantic==2.5.2
 pydantic-settings==2.1.0
+
+# HTTP & API
 requests==2.31.0
-python-Levenshtein==0.23.0
+httpx==0.25.1
+
+# NLP - Using rapidfuzz instead of python-Levenshtein
+rapidfuzz==3.6.1
+
+# Utilities
 tenacity==8.2.3
 redis==5.0.1
-alembic==1.12.1
+
+# Testing
 pytest==7.4.3
-httpx==0.25.1

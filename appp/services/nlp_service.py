@@ -1,7 +1,8 @@
+# app/services/nlp_service.py
 import re
 import string
 from typing import List, Tuple, Optional
-import Levenshtein
+from rapidfuzz import fuzz, process
 from app.utils.logger import logger
 
 class NLPService:
@@ -29,7 +30,7 @@ class NLPService:
         return text
     
     def extract_intent(self, text: str) -> Tuple[str, float]:
-        """Extract user intent from message"""
+        """Extract user intent from message using rapidfuzz"""
         text = self.preprocess_text(text)
         intent_scores = {}
         
@@ -38,10 +39,13 @@ class NLPService:
             for keyword in keywords:
                 if keyword in text:
                     score += 1
-                # Check for similar words using Levenshtein distance
+                # Use rapidfuzz for fuzzy matching instead of Levenshtein
                 for word in text.split():
-                    if len(word) > 3 and Levenshtein.ratio(word, keyword) > 0.8:
-                        score += 0.5
+                    if len(word) > 3:
+                        # Calculate similarity ratio
+                        ratio = fuzz.ratio(word, keyword) / 100.0
+                        if ratio > 0.8:
+                            score += 0.5
             intent_scores[intent] = score
         
         if not intent_scores:

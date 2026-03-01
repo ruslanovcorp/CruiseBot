@@ -12,9 +12,10 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 admin = Admin(app, engine)
+admin.add_view(UserAdmin)
 
 app.include_router(webhook.router)
-app.include_router(admin.router)
+# app.include_router(admin.router)
 app.include_router(auth.router)
 
 admin.add_view(UserAdmin)

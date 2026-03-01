@@ -1,27 +1,6 @@
-# Core
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-python-dotenv==1.0.0
-
-# Database
-sqlalchemy==2.0.23
-psycopg2-binary==2.9.9
-alembic==1.12.1
-
-# ✅ Validation - Pydantic v2 WITH pre-built wheels (no Rust compilation)
-pydantic==2.5.3
-pydantic-settings==2.1.0
-
-# HTTP & API
-requests==2.31.0
-httpx==0.25.1
-
-# NLP - Use pure Python thefuzz to avoid compilation entirely
-thefuzz==0.20.0
-
-# Utilities
-tenacity==8.2.3
-redis==5.0.1
-
-# Testing
-pytest==7.4.3
+fastapi
+uvicorn
+requests
+python-dotenv
+sqlalchemy
+psycopg2-binary

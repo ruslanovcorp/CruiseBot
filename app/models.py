@@ -24,3 +24,13 @@ class FAQ(Base):
 
     company_id = Column(Integer, ForeignKey("companies.id"))
     company = relationship("Company", back_populates="faqs")
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True)
+    email = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
+    is_admin = Column(Boolean, default=True)
+
+    company_id = Column(Integer, ForeignKey("companies.id"))

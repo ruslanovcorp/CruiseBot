@@ -1,6 +1,7 @@
+# app/config.py
 import os
 from typing import Optional
-from pydantic_settings import BaseSettings
+from pydantic import BaseSettings
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -29,12 +30,6 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
     
-    class Config:
-        case_sensitive = True
-        
-
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
-    
     @property
     def database_url_with_ssl(self) -> str:
         """Add SSL requirement for Render PostgreSQL"""
@@ -42,6 +37,9 @@ class Settings(BaseSettings):
             # Add SSL mode for Render connections
             return f"{self.DATABASE_URL}?sslmode=require"
         return self.DATABASE_URL
-
+    
+    class Config:
+        env_file = ".env"
+        case_sensitive = True
 
 settings = Settings()

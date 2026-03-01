@@ -8,15 +8,15 @@ sqlalchemy==2.0.23
 psycopg2-binary==2.9.9
 alembic==1.12.1
 
-# Validation & Settings
-pydantic==2.5.2
-pydantic-settings==2.1.0
+# Validation & Settings - Use older versions that don't require Rust
+pydantic==1.10.13
+pydantic-settings==2.0.3
 
 # HTTP & API
 requests==2.31.0
 httpx==0.25.1
 
-# NLP - Using rapidfuzz instead of python-Levenshtein
+# NLP
 rapidfuzz==3.6.1
 
 # Utilities

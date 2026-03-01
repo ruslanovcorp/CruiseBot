@@ -8,16 +8,16 @@ sqlalchemy==2.0.23
 psycopg2-binary==2.9.9
 alembic==1.12.1
 
-# Validation & Settings - Use older versions that don't require Rust
-pydantic==1.10.13
-pydantic-settings==2.0.3
+# ✅ Validation - Pydantic v2 WITH pre-built wheels (no Rust compilation)
+pydantic==2.5.3
+pydantic-settings==2.1.0
 
 # HTTP & API
 requests==2.31.0
 httpx==0.25.1
 
-# NLP
-rapidfuzz==3.6.1
+# NLP - Use pure Python thefuzz to avoid compilation entirely
+thefuzz==0.20.0
 
 # Utilities
 tenacity==8.2.3

@@ -10,3 +10,23 @@ def find_faq_answer(message: str, db, company_id: int):
     """), {"query": message, "company_id": company_id})
 
     return result.fetchone()
+
+def smart_search(db, company_id: int, message: str):
+    query = text("""
+        SELECT id, question, answer,
+               similarity(question, :message) AS score
+        FROM faqs
+        WHERE company_id = :company_id
+        ORDER BY score DESC
+        LIMIT 1
+    """)
+
+    result = db.execute(query, {
+        "message": message,
+        "company_id": company_id
+    }).fetchone()
+
+    if result and result.score > 0.25:
+        return result.answer
+
+    return None
